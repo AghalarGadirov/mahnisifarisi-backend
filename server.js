@@ -1,31 +1,22 @@
-const express = require('express');
-const fs = require('fs');
-const path = require('path');
+const express = require("express");
+const cors = require("cors");
+const fs = require("fs");
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 2002;
 
+app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
 
-const dataFile = path.join(__dirname, 'admin_data.json');
-
-// API - Get Data
-app.get('/api/data', (req, res) => {
-  fs.readFile(dataFile, 'utf8', (err, data) => {
-    if (err) return res.status(500).json({ error: 'Oxunma xətası' });
-    res.json(JSON.parse(data));
-  });
+app.get("/api/data", (req, res) => {
+  const data = fs.readFileSync("admin_data.json", "utf8");
+  res.json(JSON.parse(data));
 });
 
-// API - Update Data
-app.post('/api/data', (req, res) => {
-  const newData = JSON.stringify(req.body, null, 2);
-  fs.writeFile(dataFile, newData, (err) => {
-    if (err) return res.status(500).json({ error: 'Yazılma xətası' });
-    res.json({ success: true });
-  });
+app.post("/api/save", (req, res) => {
+  fs.writeFileSync("admin_data.json", JSON.stringify(req.body, null, 2));
+  res.json({ message: "Uğurla yadda saxlanıldı." });
 });
 
 app.listen(PORT, () => {
-  console.log(`Server işə düşdü: http://localhost:${PORT}`);
+  console.log(`Server işləyir: ${PORT}`);
 });
